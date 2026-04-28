@@ -1,70 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de Inventário</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-body {
-    font-family: Arial;
-    margin:0;
-    background:#f4f6f8;
-    text-align:center;
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+background:linear-gradient(180deg,#0f172a,#020617);
+color:white;
+padding:12px;
 }
 
-/* MOBILE FIRST */
-.mapa {
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-    padding:10px;
+/* telas */
+.screen{
+max-width:520px;
+margin:auto;
+}
+
+.hidden{display:none;}
+
+h1,h2{text-align:center;}
+
+/* cards */
+.card{
+background:#1e293b;
+padding:12px;
+border-radius:12px;
+margin:10px 0;
+}
+
+/* mapa */
+.mapa{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 
 @media(min-width:768px){
-    .mapa { grid-template-columns:repeat(4,1fr); }
+.mapa{grid-template-columns:repeat(4,1fr);}
 }
 
-.sala {
-    background:#fff;
-    border:2px solid #ccc;
-    padding:15px;
-    border-radius:10px;
-    font-size:14px;
+.sala{
+background:#020617;
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+font-size:14px;
 }
 
-.item {
-    background:#fff;
-    margin:8px auto;
-    padding:10px;
-    width:90%;
-    border-radius:8px;
-    border:1px solid #ccc;
+/* itens */
+.item{
+background:#020617;
+margin:8px 0;
+padding:10px;
+border-radius:10px;
 }
 
-button {
-    padding:10px;
-    margin:5px;
-    width:90%;
-    max-width:300px;
+/* botões */
+button{
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+font-size:16px;
 }
+
+.btn-start{background:#22c55e;}
+.btn{background:#3b82f6;}
+.btn-verificado{background:#22c55e;}
 </style>
 </head>
 
 <body>
 
-<h2>🏢 Simulador de Inventário</h2>
+<!-- INTRO -->
+<div id="start" class="screen">
 
-<button onclick="carregar('byte')">🟢 ByteWave</button>
-<button onclick="carregar('cafe')">🟡 Casa do Café</button>
-<button onclick="carregar('logi')">🔵 LogiTrans</button>
+<h1>🏢 Simulador de Inventário</h1>
+
+<p style="text-align:center; max-width:420px; margin:auto">
+Você irá explorar os ambientes de diferentes empresas 🧭  
+Seu objetivo é identificar e conferir os itens disponíveis em cada setor.
+</p>
+
+<h3 style="text-align:center">📌 O que fazer:</h3>
+
+<p style="text-align:center">
+✔ Navegar pelos ambientes da empresa<br>
+✔ Observar os itens disponíveis<br>
+✔ Identificar os itens relevantes<br>
+✔ Realizar a contagem para o inventário
+</p>
+
+<p style="text-align:center; opacity:0.7; margin-top:20px">
+Utilize este ambiente como base para registrar suas respostas no sistema principal.
+</p>
+
+<button class="btn-start" onclick="iniciar()">🚀 Iniciar Simulação</button>
+
+</div>
+
+<!-- APP -->
+<div id="app" class="screen hidden">
+
+<h1>🏢 Simulador de Inventário</h1>
+
+<div class="card">
+<button class="btn" onclick="carregar('byte')">🟢 ByteWave</button>
+<button class="btn" onclick="carregar('cafe')">🟡 Casa do Café</button>
+<button class="btn" onclick="carregar('logi')">🔵 LogiTrans</button>
+</div>
 
 <div id="mapa" class="mapa"></div>
-<div id="itens"></div>
+<div id="itens" class="card"></div>
+
+</div>
 
 <script>
 
 let estado={};
+
+function iniciar(){
+document.getElementById("start").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+}
 
 const cenarios={
 
@@ -83,76 +147,58 @@ salas:{
 
 cafe:{
 salas:{
-
 "Produção Principal ☕":[
 "☕ Máquina x6","⚙️ Moedor x4","🫖 Cafeteira x3",
 "🌱 Grãos x30","☕ Xícaras x40"
 ],
-
 "Produção Secundária ☕":[
 "☕ Máquina x5","⚙️ Moedor x3","🫖 Cafeteira x2",
 "🌱 Grãos x25"
 ],
-
 "Estoque Máquinas 📦":[
 "☕ Máquina x7","⚙️ Moedor x5","🫖 Cafeteira x4"
 ],
-
 "Estoque Insumos 📦":[
 "🌱 Grãos x50","☕ Xícaras x60"
 ],
-
 "Loja 1 🏪":[
 "☕ Máquina x3","⚙️ Moedor x2","🫖 Cafeteira x2"
 ],
-
 "Loja 2 🏪":[
 "☕ Máquina x2","⚙️ Moedor x1","🫖 Cafeteira x1"
 ],
-
 "Manutenção 🔧":[
 "⚙️ Moedor x3","🫖 Cafeteira x1"
 ],
-
 "Expedição 🚚":[
 "☕ Máquina x2","📦 Caixas x20"
 ],
-
 "Showroom 🛍️":[
 "☕ Máquina x1","🫖 Cafeteira x1"
 ],
-
 "Controle de Qualidade 🔍":[
 "⚙️ Moedor x0"
 ]
-
 }
 },
 
 logi:{
 salas:{
-
 "Recebimento 📥":["🍚 Arroz x150"],
 "Armazém 1 📦":["🍚 Arroz x140","🥫 Feijão x100"],
 "Armazém 2 📦":["🍚 Arroz x20","🥫 Feijão x110"],
 "Armazém Açúcar 📦":["🍬 Açúcar x80","🍬 Açúcar x100"],
-
 "Doca 1 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
 "Doca 2 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
-
 "Pátio 🚧":["📦 Paleteira x2"],
-
 "ADM Financeiro 💻":["💻 Notebook x5","🖨️ Impressora x2"],
 "ADM Operacional 💻":["💻 Notebook x5","🖨️ Impressora x2"],
-
 "TI 💻":["🖨️ Impressora x2"],
-"Controle 📊":["💻 Notebook x0"],
-
-"Qualidade 🔍":["🍬 Açúcar x0"],
-"Segurança 🛡️":["🚜 Empilhadeira x0"],
-"Manutenção 🔧":["📦 Paleteira x0"],
-"Estacionamento 🚗":["💻 Notebook x0"]
-
+"Controle 📊":[],
+"Qualidade 🔍":[],
+"Segurança 🛡️":[],
+"Manutenção 🔧":[],
+"Estacionamento 🚗":[]
 }
 }
 
@@ -174,7 +220,7 @@ function abrir(cenario,sala){
 let lista=cenarios[cenario].salas[sala];
 let div=document.getElementById("itens");
 
-div.innerHTML=`<h3>${sala}</h3>`;
+div.innerHTML=`<h2>${sala}</h2>`;
 
 lista.forEach((item,i)=>{
 let id=sala+i;
@@ -182,8 +228,9 @@ if(!estado[id]) estado[id]=false;
 
 div.innerHTML+=`
 <div class="item">
-${item}<br>
-<button onclick="marcar('${id}',this)">
+${item}
+<button class="${estado[id]?"btn-verificado":"btn"}"
+onclick="marcar('${id}',this)">
 ${estado[id]?"✔️ Verificado":"Verificar"}
 </button>
 </div>`;
@@ -193,7 +240,7 @@ ${estado[id]?"✔️ Verificado":"Verificar"}
 function marcar(id,btn){
 estado[id]=true;
 btn.innerText="✔️ Verificado";
-btn.disabled=true;
+btn.className="btn-verificado";
 }
 
 </script>
