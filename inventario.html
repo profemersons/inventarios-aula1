@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de Inventário</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+background:linear-gradient(180deg,#0f172a,#020617);
+color:white;
+padding:12px;
+}
+
+/* telas */
+.screen{
+max-width:520px;
+margin:auto;
+}
+
+.hidden{display:none;}
+
+h1,h2{text-align:center;}
+
+/* cards */
+.card{
+background:#1e293b;
+padding:12px;
+border-radius:12px;
+margin:10px 0;
+}
+
+/* mapa */
+.mapa{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+@media(min-width:768px){
+.mapa{grid-template-columns:repeat(4,1fr);}
+}
+
+.sala{
+background:#020617;
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+font-size:14px;
+}
+
+/* itens */
+.item{
+background:#020617;
+margin:8px 0;
+padding:10px;
+border-radius:10px;
+}
+
+/* botões */
+button{
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+font-size:16px;
+}
+
+.btn-start{background:#22c55e;}
+.btn{background:#3b82f6;}
+.btn-verificado{background:#22c55e;}
+</style>
+</head>
+
+<body>
+
+<!-- INTRO -->
+<div id="start" class="screen">
+
+<h1>🏢 Simulador de Inventário</h1>
+
+<p style="text-align:center; max-width:420px; margin:auto">
+Você irá explorar os ambientes de diferentes empresas 🧭  
+Seu objetivo é identificar e conferir os itens disponíveis em cada setor.
+</p>
+
+<h3 style="text-align:center">📌 O que fazer:</h3>
+
+<p style="text-align:center">
+✔ Navegar pelos ambientes da empresa<br>
+✔ Observar os itens disponíveis<br>
+✔ Identificar os itens relevantes<br>
+✔ Realizar a contagem para o inventário
+</p>
+
+<p style="text-align:center; opacity:0.7; margin-top:20px">
+Utilize este ambiente como base para registrar suas respostas no sistema principal.
+</p>
+
+<button class="btn-start" onclick="iniciar()">🚀 Iniciar Simulação</button>
+
+</div>
+
+<!-- APP -->
+<div id="app" class="screen hidden">
+
+<h1>🏢 Simulador de Inventário</h1>
+
+<div class="card">
+<button class="btn" onclick="carregar('byte')">🟢 ByteWave</button>
+<button class="btn" onclick="carregar('cafe')">🟡 Casa do Café</button>
+<button class="btn" onclick="carregar('logi')">🔵 LogiTrans</button>
+</div>
+
+<div id="mapa" class="mapa"></div>
+<div id="itens" class="card"></div>
+
+</div>
+
+<script>
+
+let estado={};
+
+function iniciar(){
+document.getElementById("start").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+}
+
+const cenarios={
+
+byte:{
+salas:{
+"RH 👥":["💻 Computador","🪑 Cadeira","☎️ Telefone"],
+"Financeiro 💰":["💻 Computador","💻 Computador","🖥️ Monitor"],
+"TI 💻":["💻 Computador","💻 Computador","💻 Computador","🖥️ Monitor"],
+"Comercial 📈":["💻 Computador","💻 Computador","☎️ Telefone"],
+"Diretoria 🧑‍💼":["💻 Computador","🪑 Cadeira"],
+"Reunião 📊":["💻 Computador","📽️ Projetor"],
+"Suporte 🛠️":["💻 Computador","💻 Computador"],
+"Operações ⚙️":["💻 Computador","💻 Computador"]
+}
+},
+
+cafe:{
+salas:{
+"Produção Principal ☕":[
+"☕ Máquina x6","⚙️ Moedor x4","🫖 Cafeteira x3",
+"🌱 Grãos x30","☕ Xícaras x40"
+],
+"Produção Secundária ☕":[
+"☕ Máquina x5","⚙️ Moedor x3","🫖 Cafeteira x2",
+"🌱 Grãos x25"
+],
+"Estoque Máquinas 📦":[
+"☕ Máquina x7","⚙️ Moedor x5","🫖 Cafeteira x4"
+],
+"Estoque Insumos 📦":[
+"🌱 Grãos x50","☕ Xícaras x60"
+],
+"Loja 1 🏪":[
+"☕ Máquina x3","⚙️ Moedor x2","🫖 Cafeteira x2"
+],
+"Loja 2 🏪":[
+"☕ Máquina x2","⚙️ Moedor x1","🫖 Cafeteira x1"
+],
+"Manutenção 🔧":[
+"⚙️ Moedor x3","🫖 Cafeteira x1"
+],
+"Expedição 🚚":[
+"☕ Máquina x2","📦 Caixas x20"
+],
+"Showroom 🛍️":[
+"☕ Máquina x1","🫖 Cafeteira x1"
+],
+"Controle de Qualidade 🔍":[
+"⚙️ Moedor x0"
+]
+}
+},
+
+logi:{
+salas:{
+"Recebimento 📥":["🍚 Arroz x150"],
+"Armazém 1 📦":["🍚 Arroz x140","🥫 Feijão x100"],
+"Armazém 2 📦":["🍚 Arroz x20","🥫 Feijão x110"],
+"Armazém Açúcar 📦":["🍬 Açúcar x80","🍬 Açúcar x100"],
+"Doca 1 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
+"Doca 2 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
+"Pátio 🚧":["📦 Paleteira x2"],
+"ADM Financeiro 💻":["💻 Notebook x5","🖨️ Impressora x2"],
+"ADM Operacional 💻":["💻 Notebook x5","🖨️ Impressora x2"],
+"TI 💻":["🖨️ Impressora x2"],
+"Controle 📊":[],
+"Qualidade 🔍":[],
+"Segurança 🛡️":[],
+"Manutenção 🔧":[],
+"Estacionamento 🚗":[]
+}
+}
+
+};
+
+function carregar(nome){
+estado={};
+let mapa=document.getElementById("mapa");
+mapa.innerHTML="";
+
+for(let sala in cenarios[nome].salas){
+mapa.innerHTML+=`<div class="sala" onclick="abrir('${nome}','${sala}')">${sala}</div>`;
+}
+
+document.getElementById("itens").innerHTML="";
+}
+
+function abrir(cenario,sala){
+let lista=cenarios[cenario].salas[sala];
+let div=document.getElementById("itens");
+
+div.innerHTML=`<h2>${sala}</h2>`;
+
+lista.forEach((item,i)=>{
+let id=sala+i;
+if(!estado[id]) estado[id]=false;
+
+div.innerHTML+=`
+<div class="item">
+${item}
+<button class="${estado[id]?"btn-verificado":"btn"}"
+onclick="marcar('${id}',this)">
+${estado[id]?"✔️ Verificado":"Verificar"}
+</button>
+</div>`;
+});
+}
+
+function marcar(id,btn){
+estado[id]=true;
+btn.innerText="✔️ Verificado";
+btn.className="btn-verificado";
+}
+
+</script>
+
+</body>
+</html>
