@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Inventário</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin:0;
+    background:#f4f6f8;
+    text-align:center;
+}
+
+/* MOBILE FIRST */
+.mapa {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    padding:10px;
+}
+
+@media(min-width:768px){
+    .mapa { grid-template-columns:repeat(4,1fr); }
+}
+
+.sala {
+    background:#fff;
+    border:2px solid #ccc;
+    padding:15px;
+    border-radius:10px;
+    font-size:14px;
+}
+
+.item {
+    background:#fff;
+    margin:8px auto;
+    padding:10px;
+    width:90%;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button {
+    padding:10px;
+    margin:5px;
+    width:90%;
+    max-width:300px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🏢 Simulador de Inventário</h2>
+
+<button onclick="carregar('byte')">🟢 ByteWave</button>
+<button onclick="carregar('cafe')">🟡 Casa do Café</button>
+<button onclick="carregar('logi')">🔵 LogiTrans</button>
+
+<div id="mapa" class="mapa"></div>
+<div id="itens"></div>
+
+<script>
+
+let estado={};
+
+const cenarios={
+
+byte:{
+salas:{
+"RH 👥":["💻 Computador","🪑 Cadeira","☎️ Telefone"],
+"Financeiro 💰":["💻 Computador","💻 Computador","🖥️ Monitor"],
+"TI 💻":["💻 Computador","💻 Computador","💻 Computador","🖥️ Monitor"],
+"Comercial 📈":["💻 Computador","💻 Computador","☎️ Telefone"],
+"Diretoria 🧑‍💼":["💻 Computador","🪑 Cadeira"],
+"Reunião 📊":["💻 Computador","📽️ Projetor"],
+"Suporte 🛠️":["💻 Computador","💻 Computador"],
+"Operações ⚙️":["💻 Computador","💻 Computador"]
+}
+},
+
+cafe:{
+salas:{
+
+"Produção Principal ☕":[
+"☕ Máquina x6","⚙️ Moedor x4","🫖 Cafeteira x3",
+"🌱 Grãos x30","☕ Xícaras x40"
+],
+
+"Produção Secundária ☕":[
+"☕ Máquina x5","⚙️ Moedor x3","🫖 Cafeteira x2",
+"🌱 Grãos x25"
+],
+
+"Estoque Máquinas 📦":[
+"☕ Máquina x7","⚙️ Moedor x5","🫖 Cafeteira x4"
+],
+
+"Estoque Insumos 📦":[
+"🌱 Grãos x50","☕ Xícaras x60"
+],
+
+"Loja 1 🏪":[
+"☕ Máquina x3","⚙️ Moedor x2","🫖 Cafeteira x2"
+],
+
+"Loja 2 🏪":[
+"☕ Máquina x2","⚙️ Moedor x1","🫖 Cafeteira x1"
+],
+
+"Manutenção 🔧":[
+"⚙️ Moedor x3","🫖 Cafeteira x1"
+],
+
+"Expedição 🚚":[
+"☕ Máquina x2","📦 Caixas x20"
+],
+
+"Showroom 🛍️":[
+"☕ Máquina x1","🫖 Cafeteira x1"
+],
+
+"Controle de Qualidade 🔍":[
+"⚙️ Moedor x0"
+]
+
+}
+},
+
+logi:{
+salas:{
+
+"Recebimento 📥":["🍚 Arroz x150"],
+"Armazém 1 📦":["🍚 Arroz x140","🥫 Feijão x100"],
+"Armazém 2 📦":["🍚 Arroz x20","🥫 Feijão x110"],
+"Armazém Açúcar 📦":["🍬 Açúcar x80","🍬 Açúcar x100"],
+
+"Doca 1 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
+"Doca 2 🚛":["🚜 Empilhadeira x2","📦 Paleteira x3"],
+
+"Pátio 🚧":["📦 Paleteira x2"],
+
+"ADM Financeiro 💻":["💻 Notebook x5","🖨️ Impressora x2"],
+"ADM Operacional 💻":["💻 Notebook x5","🖨️ Impressora x2"],
+
+"TI 💻":["🖨️ Impressora x2"],
+"Controle 📊":["💻 Notebook x0"],
+
+"Qualidade 🔍":["🍬 Açúcar x0"],
+"Segurança 🛡️":["🚜 Empilhadeira x0"],
+"Manutenção 🔧":["📦 Paleteira x0"],
+"Estacionamento 🚗":["💻 Notebook x0"]
+
+}
+}
+
+};
+
+function carregar(nome){
+estado={};
+let mapa=document.getElementById("mapa");
+mapa.innerHTML="";
+
+for(let sala in cenarios[nome].salas){
+mapa.innerHTML+=`<div class="sala" onclick="abrir('${nome}','${sala}')">${sala}</div>`;
+}
+
+document.getElementById("itens").innerHTML="";
+}
+
+function abrir(cenario,sala){
+let lista=cenarios[cenario].salas[sala];
+let div=document.getElementById("itens");
+
+div.innerHTML=`<h3>${sala}</h3>`;
+
+lista.forEach((item,i)=>{
+let id=sala+i;
+if(!estado[id]) estado[id]=false;
+
+div.innerHTML+=`
+<div class="item">
+${item}<br>
+<button onclick="marcar('${id}',this)">
+${estado[id]?"✔️ Verificado":"Verificar"}
+</button>
+</div>`;
+});
+}
+
+function marcar(id,btn){
+estado[id]=true;
+btn.innerText="✔️ Verificado";
+btn.disabled=true;
+}
+
+</script>
+
+</body>
+</html>
