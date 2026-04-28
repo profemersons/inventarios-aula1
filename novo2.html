@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Missão Inventário</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #0f172a, #020617);
+            color: white;
+            padding: 12px;
+        }
+
+        .screen {
+            max-width: 520px;
+            margin: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: none;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .btn-start {
+            background: #22c55e;
+        }
+
+        .btn-check {
+            background: #22c55e;
+        }
+
+        .btn-next {
+            background: #3b82f6;
+        }
+
+        .result {
+            margin-top: 12px;
+            background: #020617;
+            padding: 12px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- INTRO -->
+    <div id="start" class="screen">
+
+        <h1>📦 Missão Inventário</h1>
+
+        <p style="text-align:center; max-width:420px; margin:auto">
+            Hoje você assume o papel de <b>analista de patrimônio</b> 🧠💼
+            Sua missão será realizar inventários em diferentes empresas,
+            conferindo registros e comparando com a realidade.
+        </p>
+
+        <h3 style="text-align:center">📊 Sua missão:</h3>
+
+        <p style="text-align:center">
+            ✔ Definir o tipo de inventário
+            ✔ Escolher a forma de execução
+            ✔ Conferir itens nos ambientes
+            ✔ Registrar as diferenças encontradas
+        </p>
+
+        <p style="text-align:center; opacity:0.7; margin-top:20px">
+            Feito com carinho e exclusividade para ADM5 🤍
+        </p>
+
+        <button class="btn-start" onclick="startGame()">🚀 Iniciar Missão</button>
+
+    </div>
+
+    <!-- GAME -->
+    <div id="game" class="screen hidden">
+        <h1>📦 Missão Inventário</h1>
+        <div id="app"></div>
+    </div>
+
+    <script>
+
+        let nivel = 0;
+
+        function startGame() {
+            document.getElementById("start").classList.add("hidden");
+            document.getElementById("game").classList.remove("hidden");
+            load();
+        }
+
+        const cenarios = [
+
+            {
+                nome: "ByteWave Informática",
+                contexto: "A empresa vem enfrentando inconsistências no controle de equipamentos administrativos. Durante auditoria interna, foi identificado que alguns computadores podem ter sido realocados entre setores sem atualização no sistema. Como a empresa está em alta demanda, não é possível interromper as atividades. Você deve conferir apenas esses equipamentos, circulando pelos setores administrativos.",
+
+                registro: [
+                    { nome: "🖥️ Computadores Dell OptiPlex", qtd: 12 }
+                ]
+            },
+
+            {
+                nome: "Casa do Café Equipamentos",
+                contexto: "A empresa identificou divergências no controle de estoque de produtos para venda. Alguns itens podem ter sido movimentados entre estoque, loja e assistência técnica sem registro. A loja continuará funcionando, mas o acesso ao estoque será controlado. Você deve conferir os produtos relacionados ao estoque de vendas, considerando que podem estar distribuídos em diferentes áreas.",
+
+                registro: [
+                    { nome: "☕ Máquina de Café Philco", qtd: 25 },
+                    { nome: "⚙️ Moedor Cadence", qtd: 18 },
+                    { nome: "🔥 Cafeteira Mondial", qtd: 12 }
+                ]
+            },
+
+            {
+                nome: "LogiTrans Distribuidora",
+                contexto: "A empresa está realizando o fechamento anual e precisa garantir total precisão dos registros. Para isso, todas as operações foram interrompidas temporariamente. Você deve realizar a conferência completa dos bens e produtos, verificando todos os setores da empresa.",
+
+                registro: [
+                    { nome: "🍚 Arroz 5kg", qtd: 300 },
+                    { nome: "🥫 Feijão 1kg", qtd: 220 },
+                    { nome: "🍬 Açúcar 1kg", qtd: 180 },
+                    { nome: "🚜 Empilhadeira", qtd: 4 },
+                    { nome: "📦 Paleteira", qtd: 8 },
+                    { nome: "💻 Notebook", qtd: 10 },
+                    { nome: "🖨️ Impressora", qtd: 6 }
+                ]
+            }
+
+        ];
+
+        function load() {
+
+            let c = cenarios[nivel];
+
+            let html = `
+<h2>${c.nome}</h2>
+<p style="opacity:0.8">${c.contexto}</p>
+
+<div class="card">
+<h3>📊 Definir Inventário</h3>
+
+<label>Tipo de Inventário</label>
+<select id="tipo">
+<option>Geral</option>
+<option>Parcial</option>
+<option>Específico</option>
+</select>
+
+<label>Forma de Execução</label>
+<select id="exec">
+<option>Aberta</option>
+<option>Semifechada</option>
+<option>Portas fechadas</option>
+</select>
+</div>
+
+<div class="card">
+<h3>📄 Registro da Empresa</h3>
+`;
+
+            c.registro.forEach((item, i) => {
+                html += `
+<p>${item.nome} — <strong>${item.qtd}</strong></p>
+<input type="number" id="real${i}" placeholder="Quantidade encontrada">
+`;
+            });
+
+            html += `
+</div>
+
+<button class="btn-check" onclick="verificar()">✔ Finalizar Inventário</button>
+
+<div id="resultado" class="result"></div>
+`;
+
+            document.getElementById("app").innerHTML = html;
+        }
+
+        function verificar() {
+
+            let c = cenarios[nivel];
+
+            let tipo = document.getElementById("tipo").value;
+            let exec = document.getElementById("exec").value;
+
+            let msg = "<h3>📊 Registro do Inventário</h3>";
+
+            msg += `<b>Tipo selecionado:</b> ${tipo}<br>`;
+            msg += `<b>Execução selecionada:</b> ${exec}<br><br>`;
+
+            msg += "<b>📦 Conferência realizada:</b><br>";
+
+            c.registro.forEach((item, i) => {
+                let real = parseInt(document.getElementById("real" + i).value);
+
+                if (isNaN(real)) {
+                    msg += `⚠ ${item.nome}: não informado<br>`;
+                    return;
+                }
+
+                let diff = real - item.qtd;
+
+                msg += `${item.nome}<br>`;
+                msg += `Registrado: ${item.qtd}<br>`;
+                msg += `Encontrado: ${real}<br>`;
+                msg += `Diferença: ${diff > 0 ? "+" + diff : diff}<br><br>`;
+            });
+
+            msg += `<button class="btn-next" onclick="proximo()">➡ Próximo cenário</button>`;
+
+            document.getElementById("resultado").innerHTML = msg;
+
+        }
+
+        function proximo() {
+            nivel++;
+            if (nivel >= cenarios.length) {
+                document.getElementById("app").innerHTML = "<h2>🏁 Missão concluída!</h2>";
+                return;
+            }
+            load();
+        }
+
+    </script>
+
+</body>
+
+</html>
